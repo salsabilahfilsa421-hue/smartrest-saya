@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartRest — Dashboard Riset Akses Internet Pelajar</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+/* ============================================================
+   SmartRest Dashboard — Dark Blue Theme
+   ============================================================ */
+
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Dark Blue Palette */
+  --bg-deepest:   #040d1e;
+  --bg-darker:    #071528;
+  --bg-dark:      #0a1e38;
+  --bg-card:      #0d2244;
+  --bg-card-hover:#0f2850;
+  --bg-elevated:  #112a52;
+  --border:       rgba(77, 166, 255, 0.12);
+  --border-hover: rgba(77, 166, 255, 0.28);
+
+  /* Accent Colors */
+  --blue:         #4DA6FF;
+  --blue-dim:     rgba(77, 166, 255, 0.15);
+  --teal:         #2ED8A8;
+  --teal-dim:     rgba(46, 216, 168, 0.15);
+  --coral:        #FF6B6B;
+  --coral-dim:    rgba(255, 107, 107, 0.15);
+  --amber:        #FFB347;
+  --amber-dim:    rgba(255, 179, 71, 0.15);
+  --purple:       #A78BFA;
+  --purple-dim:   rgba(167, 139, 250, 0.15);
+
+  /* Text */
+  --text-primary:   #e8f4ff;
+  --text-secondary: #7aa3c8;
+  --text-muted:     #3d6080;
+
+  /* Sidebar */
+  --sidebar-w: 220px;
+  --topbar-h:  68px;
+
+  /* Typography */
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg-deepest);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-darker); }
+::-webkit-scrollbar-thumb { background: var(--bg-elevated); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--blue-dim); }
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--bg-darker);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  z-index: 100;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo-icon {
+  width: 36px; height: 36px;
+  background: var(--blue-dim);
+  border: 1px solid var(--border-hover);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--blue);
+  flex-shrink: 0;
+}
+
+.logo-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.3px;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 13.5px;
+  font-weight: 400;
+  transition: background 0.15s, color 0.15s;
+  border: 1px solid transparent;
+}
+
+.nav-item:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+.nav-item.active {
+  background: var(--blue-dim);
+  color: var(--blue);
+  border-color: rgba(77, 166, 255, 0.25);
+  font-weight: 500;
+}
+
+.nav-item svg { flex-shrink: 0; opacity: 0.8; }
+
+.sidebar-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.source-badge {
+  font-size: 11px;
+  color: var(--text-muted);
+  background: var(--bg-dark);
+  border: 1px solid var(--border);
+  padding: 5px 10px;
+  border-radius: 6px;
+  text-align: center;
+  letter-spacing: 0.4px;
+}
+
+/* ============================================================
+   MAIN LAYOUT
+   ============================================================ */
+.main {
+  margin-left: var(--sidebar-w);
+  min-height: 100vh;
+  background: var(--bg-deepest);
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(4, 13, 30, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: var(--topbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.page-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar-left {
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar-right {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.badge-kota {
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: var(--blue-dim);
+  border: 1px solid rgba(77, 166, 255, 0.3);
+  color: var(--blue);
+  font-weight: 500;
+}
+
+.badge-provinsi {
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: var(--teal-dim);
+  border: 1px solid rgba(46, 216, 168, 0.3);
+  color: var(--teal);
+  font-weight: 500;
+}
+
+/* ── SECTIONS ── */
+.section {
+  padding: 28px 28px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.section + .section {
+  border-top: 1px solid var(--border);
+}
+
+.section-title-row { margin-bottom: 4px; }
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.section-desc {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+}
+
+/* ============================================================
+   METRIC CARDS
+   ============================================================ */
+.metric-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  width: 100%;
+}
+
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 18px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.metric-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+
+.metric-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.accent-blue  .metric-icon { background: var(--blue-dim);   color: var(--blue);   border: 1px solid rgba(77,166,255,0.25); }
+.accent-teal  .metric-icon { background: var(--teal-dim);   color: var(--teal);   border: 1px solid rgba(46,216,168,0.25); }
+.accent-coral .metric-icon { background: var(--coral-dim);  color: var(--coral);  border: 1px solid rgba(255,107,107,0.25);}
+.accent-purple .metric-icon { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(167,139,250,0.25);}
+
+.metric-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.metric-label {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.metric-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+
+.accent-blue  .metric-value { color: var(--blue); }
+.accent-teal  .metric-value { color: var(--teal); }
+.accent-coral .metric-value { color: var(--coral); }
+.accent-purple .metric-value { color: var(--purple); }
+
+.metric-compare {
+  font-size: 11px;
+  color: var(--teal);
+  margin-top: 2px;
+}
+.metric-compare.compare-down { color: var(--coral); }
+
+/* ============================================================
+   CHART CARDS
+   ============================================================ */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.charts-row > .chart-card {
+  min-width: 0;
+  width: 100%;
+}
+
+.chart-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+  transition: border-color 0.2s;
+}
+
+.chart-card:hover { border-color: var(--border-hover); }
+
+.chart-header { margin-bottom: 12px; }
+
+.chart-header h3 {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 3px;
+}
+
+.chart-sub {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.canvas-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.canvas-wrap canvas {
+  width: 100% !important;
+  max-width: 100%;
+}
+
+.legend-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.leg-dot {
+  width: 9px; height: 9px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   AGE SELECTOR
+   ============================================================ */
+.age-selector {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+.age-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 10px 12px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s;
+  line-height: 1;
+}
+
+.age-btn span {
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.age-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.age-btn.active {
+  background: var(--blue-dim);
+  border-color: rgba(77, 166, 255, 0.4);
+  color: var(--blue);
+}
+
+.age-btn.active span { color: rgba(77, 166, 255, 0.6); }
+
+.age-context-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-hover);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.age-context-num {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--blue);
+  line-height: 1;
+  letter-spacing: -2px;
+  opacity: 0.7;
+}
+
+.age-context-level {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.age-context-desc {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+/* ============================================================
+   TAB BUTTONS
+   ============================================================ */
+.tab-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tab-btn {
+  font-size: 12.5px;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.tab-btn:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-color: var(--border-hover);
+}
+
+.tab-btn.active {
+  background: var(--blue-dim);
+  color: var(--blue);
+  border-color: rgba(77, 166, 255, 0.35);
+  font-weight: 500;
+}
+
+/* ============================================================
+   DATA TABLE
+   ============================================================ */
+.table-wrap {
+  overflow-x: auto;
+  margin-top: 8px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table thead tr {
+  border-bottom: 1px solid var(--border-hover);
+}
+
+.data-table th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.col-num { text-align: right !important; }
+
+.data-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+}
+
+.data-table tbody tr:hover td {
+  background: var(--bg-elevated);
+}
+
+.data-table .col-num { text-align: right; }
+
+.data-table .row-kendari td {
+  background: rgba(77, 166, 255, 0.06);
+  font-weight: 500;
+}
+
+.data-table .row-kendari td:first-child {
+  color: var(--blue);
+}
+
+.data-table .row-provinsi td {
+  background: rgba(46, 216, 168, 0.06);
+}
+
+.data-table .row-provinsi td:first-child {
+  color: var(--teal);
+}
+
+.pct-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.pct-val { min-width: 42px; text-align: right; }
+
+.pct-bar-mini {
+  width: 60px;
+  height: 5px;
+  background: rgba(77, 166, 255, 0.12);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.pct-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--blue);
+}
+
+/* ============================================================
+   FINDINGS
+   ============================================================ */
+.findings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.finding-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 20px 18px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.finding-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+}
+
+.finding-icon {
+  width: 44px; height: 44px;
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+
+.finding-blue   .finding-icon { background: var(--blue-dim);   color: var(--blue);   border: 1px solid rgba(77,166,255,0.25); }
+.finding-teal   .finding-icon { background: var(--teal-dim);   color: var(--teal);   border: 1px solid rgba(46,216,168,0.25); }
+.finding-amber  .finding-icon { background: var(--amber-dim);  color: var(--amber);  border: 1px solid rgba(255,179,71,0.25); }
+.finding-coral  .finding-icon { background: var(--coral-dim);  color: var(--coral);  border: 1px solid rgba(255,107,107,0.25); }
+.finding-purple .finding-icon { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(167,139,250,0.25); }
+
+.finding-card h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.finding-card p {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+/* ============================================================
+   HAMBURGER / MOBILE NAV
+   ============================================================ */
+.hamburger {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 38px; height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, border-color 0.15s;
+}
+.hamburger:hover { background: var(--bg-elevated); border-color: var(--border-hover); }
+
+/* Mobile overlay backdrop */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 13, 30, 0.7);
+  z-index: 90;
+  backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.sidebar-overlay.open {
+  pointer-events: all;
+  opacity: 1;
+}
+
+/* Bottom navigation bar for mobile */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--bg-darker);
+  border-top: 1px solid var(--border);
+  z-index: 100;
+  padding: 6px 0 env(safe-area-inset-bottom, 6px);
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 400;
+  transition: color 0.15s;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  flex: 1;
+}
+
+.bottom-nav-item svg { opacity: 0.7; }
+
+.bottom-nav-item.active {
+  color: var(--blue);
+}
+.bottom-nav-item.active svg { opacity: 1; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1200px) {
+  :root { --sidebar-w: 200px; }
+  .metric-row { grid-template-columns: repeat(2, 1fr); }
+  .findings-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+  /* Body layout: full width, no sidebar */
+
+  /* Sidebar: hidden by default, slides in from left */
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+    width: 240px;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.4);
+  }
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay { display: block; }
+
+  .main { margin-left: 0; padding-bottom: 70px; }
+
+  /* Show hamburger in topbar */
+  .hamburger { display: flex; }
+
+  /* Bottom nav visible */
+  .bottom-nav { display: flex; }
+
+  /* Topbar tweaks */
+  .topbar { padding: 0 16px; gap: 10px; }
+  .page-sub { display: none; }
+  .badge-provinsi { display: none; }
+
+  /* Age selector */
+  .age-selector { grid-template-columns: repeat(3, 1fr); }
+  .charts-row { grid-template-columns: 1fr; }
+  .findings-grid { grid-template-columns: 1fr; }
+  .metric-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 560px) {
+  :root { --topbar-h: 58px; }
+
+  .metric-row { grid-template-columns: 1fr; }
+  .section { padding: 18px 14px 32px; }
+  .section-title { font-size: 16px; }
+
+  .page-title { font-size: 15px; }
+  .badge-kota { font-size: 11px; padding: 4px 10px; }
+
+  .chart-card { padding: 16px 14px; }
+
+  .age-selector { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .age-btn { padding: 12px 6px 10px; font-size: 19px; }
+
+  .age-context-card { flex-direction: column; gap: 10px; padding: 14px; }
+  .age-context-num { font-size: 36px; }
+
+  .tab-btn { font-size: 11.5px; padding: 6px 11px; }
+
+  .findings-grid { grid-template-columns: 1fr; }
+
+  .pct-bar-mini { width: 40px; }
+  .data-table th, .data-table td { padding: 8px 10px; font-size: 12px; }
+
+  .canvas-wrap[style*="height:520px"] { height: 360px !important; }
+  .canvas-wrap[style*="height:280px"] { height: 220px !important; }
+}
+
+/* ── RESPONDEN BANNER ── */
+.responden-banner {
+  padding: 28px 32px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.responden-label {
+  font-size: 12.5px;
+  color: var(--text-secondary);
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+.responden-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+}
+
+@media (max-width: 560px) {
+  .responden-banner { padding: 20px 14px 18px; }
+  .responden-value { font-size: 28px; }
+}
+  </style>
+</head>
+<body>
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <span class="logo-text">SmartRest</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a href="#overview"    class="nav-item active" data-section="overview">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Overview</span>
+      </a>
+      <a href="#usia"        class="nav-item" data-section="usia">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Kelompok Usia</span>
+      </a>
+      <a href="#wilayah"     class="nav-item" data-section="wilayah">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+        <span>Sebaran Wilayah</span>
+      </a>
+      <a href="#temuan"      class="nav-item" data-section="temuan">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Temuan Kunci</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="source-badge">BPS Sultra 2024</div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="hamburger" id="hamburgerBtn" aria-label="Buka menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <div class="topbar-left">
+        <h1 class="page-title">Dashboard Riset SmartRest</h1>
+        <p class="page-sub">Akses Internet Pelajar · Kota Kendari · 2024</p>
+      </div>
+      <div class="topbar-right">
+        <div class="badge-kota">Kota Kendari</div>
+        
+      </div>
+    </header>
+
+    <!-- ── RESPONDEN BANNER ── -->
+    <div class="responden-banner">
+      <span class="responden-label">Total Responden Saat Ini</span>
+      <span class="responden-value">410 Responden</span>
+    </div>
+
+    <!-- ── SECTION: OVERVIEW ── -->
+    <section id="overview" class="section">
+
+      <!-- Metric Cards -->
+      <div class="metric-row">
+        <div class="metric-card accent-blue">
+          <div class="metric-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-label">Pernah Mengakses</span>
+            <span class="metric-value">23.88%</span>
+            <span class="metric-compare">Pelajar pernah akses</span>
+          </div>
+        </div>
+        <div class="metric-card accent-teal">
+          <div class="metric-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><path d="M8 2v16"/><path d="M16 6v16"/></svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-label">Sedang Mengakses</span>
+            <span class="metric-value">34.91%</span>
+            <span class="metric-compare">Aktif saat ini</span>
+          </div>
+        </div>
+        <div class="metric-card accent-coral">
+          <div class="metric-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-label">Tidak Menggunakan</span>
+            <span class="metric-value">41.21%</span>
+            <span class="metric-compare">Belum menggunakan</span>
+          </div>
+        </div>
+        <div class="metric-card accent-purple">
+          <div class="metric-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-label">Total Aktif Internet</span>
+            <span class="metric-value">58.79%</span>
+            <span class="metric-compare">Pernah + Sedang</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-row">
+        <div class="chart-card chart-half">
+          <div class="chart-header">
+            <h3>Distribusi Akses Internet</h3>
+            <span class="chart-sub">Kota Kendari 2024</span>
+          </div>
+          <div class="legend-row">
+            <span class="legend-item"><span class="leg-dot" style="background:#4DA6FF"></span>Pernah 23.88%</span>
+            <span class="legend-item"><span class="leg-dot" style="background:#2ED8A8"></span>Sedang 34.91%</span>
+            <span class="legend-item"><span class="leg-dot" style="background:#FF6B6B"></span>Tidak 41.21%</span>
+          </div>
+          <div class="canvas-wrap" style="height:260px">
+            <canvas id="donutKendari" aria-label="Distribusi akses internet Kota Kendari">Pernah 23.88%, Sedang 34.91%, Tidak 41.21%</canvas>
+          </div>
+        </div>
+
+        <div class="chart-card chart-half">
+          <div class="chart-header">
+            <h3>Rincian Per Kategori</h3>
+            <span class="chart-sub">Persentase akses internet Kota Kendari · 2024</span>
+          </div>
+          <div class="canvas-wrap" style="height:260px">
+            <canvas id="kendariBar" aria-label="Rincian kategori akses internet Kota Kendari"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── SECTION: KELOMPOK USIA ── -->
+    <section id="usia" class="section">
+      <div class="section-title-row">
+        <h2 class="section-title">Profil Kelompok Usia Pelajar</h2>
+        <p class="section-desc">Berdasarkan rentang usia kuesioner SmartRest (13–18 tahun) · SMP & SMA Kota Kendari</p>
+      </div>
+
+      <!-- Age Selector -->
+      <div class="age-selector">
+        <button class="age-btn active" data-age="13">13<span>SMP VII</span></button>
+        <button class="age-btn" data-age="14">14<span>SMP VIII</span></button>
+        <button class="age-btn" data-age="15">15<span>SMP IX</span></button>
+        <button class="age-btn" data-age="16">16<span>SMA X</span></button>
+        <button class="age-btn" data-age="17">17<span>SMA XI</span></button>
+        <button class="age-btn" data-age="18">18<span>SMA XII</span></button>
+      </div>
+
+      <div id="age-context" class="age-context-card">
+        <div class="age-context-num">13</div>
+        <div class="age-context-info">
+          <p class="age-context-level">SMP Kelas VII</p>
+          <p class="age-context-desc">Transisi dari SD ke SMP — awal paparan gadget intensif. Mulai terbiasa media sosial dan konten video.</p>
+        </div>
+      </div>
+
+      <!-- Tab Row -->
+      <div class="tab-row" id="ageTabRow">
+        <button class="tab-btn active" data-tab="gadget">Kepemilikan Gadget</button>
+        <button class="tab-btn" data-tab="duration">Durasi Harian</button>
+        <button class="tab-btn" data-tab="sleep">Jam Tidur</button>
+        <button class="tab-btn" data-tab="focus">Konsentrasi Belajar</button>
+        <button class="tab-btn" data-tab="activity">Aktivitas di Gadget</button>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 id="ageChartTitle">Kepemilikan Gadget — Usia 13 Tahun</h3>
+          <span class="chart-sub" id="ageChartSub">Estimasi berdasarkan tren nasional penggunaan gadget pada pelajar</span>
+        </div>
+        <div class="canvas-wrap" style="height:260px">
+          <canvas id="ageChart" aria-label="Profil usia pelajar">Data profil pelajar</canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION: WILAYAH ── -->
+    <section id="wilayah" class="section">
+      <div class="section-title-row">
+        <h2 class="section-title">Sebaran Wilayah — Sulawesi Tenggara</h2>
+        <p class="section-desc">Persentase penduduk 5 tahun ke atas mengakses internet per kabupaten/kota · 2024</p>
+      </div>
+
+      <div class="tab-row" id="regTabRow">
+        <button class="tab-btn active" data-tab="sedang">Sedang Mengakses</button>
+        <button class="tab-btn" data-tab="pernah">Pernah Mengakses</button>
+        <button class="tab-btn" data-tab="tidak">Tidak Menggunakan</button>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 id="regChartTitle">Persentase Wilayah Sedang Mengakses Internet</h3>
+        </div>
+        <div class="canvas-wrap" style="height:520px">
+          <canvas id="regChart" aria-label="Akses internet per kabupaten kota Sulawesi Tenggara">Data akses internet per wilayah</canvas>
+        </div>
+      </div>
+
+      <!-- Data Table -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Tabel Lengkap Data BPS 2024</h3>
+          <span class="chart-sub">Persentase penduduk ≥5 tahun mengakses internet · Sulawesi Tenggara</span>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="dataTable">
+            <thead>
+              <tr>
+                <th>Kabupaten / Kota</th>
+                <th class="col-num">Pernah (%)</th>
+                <th class="col-num">Sedang (%)</th>
+                <th class="col-num">Tidak (%)</th>
+                <th class="col-num">Total Akses (%)</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SECTION: TEMUAN ── -->
+    <section id="temuan" class="section">
+      <div class="section-title-row">
+        <h2 class="section-title">Temuan Kunci Riset SmartRest</h2>
+        <p class="section-desc">Analisis data BPS 2024 untuk mendukung perancangan aplikasi SmartRest</p>
+      </div>
+
+      <div class="findings-grid">
+        <div class="finding-card finding-blue">
+          <div class="finding-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <h4>23.88% Pelajar Pernah Mengakses</h4>
+          <p>Hampir seperempat pelajar Kota Kendari masuk kategori "pernah mengakses", menunjukkan tingkat familiaritas terhadap internet yang cukup tinggi dan potensi adopsi SmartRest yang besar.</p>
+        </div>
+        <div class="finding-card finding-teal">
+          <div class="finding-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <h4>58.79% Pelajar Aktif Internet</h4>
+          <p>Gabungan "pernah" dan "sedang mengakses" di Kendari mencapai 58.79%. Lebih dari separuh pelajar SMP–SMA sudah terpapar internet, menjadikan mereka target utama SmartRest.</p>
+        </div>
+        <div class="finding-card finding-amber">
+          <div class="finding-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <h4>34.91% Aktif Mengakses Saat Ini</h4>
+          <p>Lebih dari sepertiga pelajar Kota Kendari saat ini aktif menggunakan internet, menjadikan mereka segmen utama yang paling membutuhkan solusi manajemen waktu layar seperti SmartRest.</p>
+        </div>
+        <div class="finding-card finding-coral">
+          <div class="finding-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h4>41.21% Belum Menggunakan Internet</h4>
+          <p>Masih ada 41.21% penduduk Kendari yang tidak menggunakan internet, mengindikasikan potensi pertumbuhan pengguna gadget ke depan yang akan membutuhkan solusi seperti SmartRest.</p>
+        </div>
+        <div class="finding-card finding-purple">
+          <div class="finding-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h4>Segmen Usia 13–18 Tahun Prioritas</h4>
+          <p>Pelajar SMP–SMA usia 13–18 tahun merupakan kelompok pengguna gadget paling intensif. Usia 17–18 tahun cenderung tidur larut dan mengalami penurunan konsentrasi akibat penggunaan gadget berlebih.</p>
+        </div>
+        <div class="finding-card finding-teal">
+          <div class="finding-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h4>Rekomendasi Fitur SmartRest</h4>
+          <p>Berdasarkan data, SmartRest perlu mengutamakan: mode fokus belajar, pengingat waktu tidur otomatis, pemblokiran aplikasi di atas pukul 22:00, dan laporan mingguan penggunaan gadget untuk orang tua.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+// ============================================================
+//  SmartRest Dashboard — Data Layer
+//  Sumber: BPS Sulawesi Tenggara 2024
+// ============================================================
+
+const BPS_DATA = [
+  { nama: 'Buton',              pernah: 22.48, sedang: 37.06, tidak: 40.47 },
+  { nama: 'Muna',               pernah: 30.47, sedang: 30.56, tidak: 38.97 },
+  { nama: 'Konawe',             pernah: 16.87, sedang: 59.68, tidak: 23.45 },
+  { nama: 'Kolaka',             pernah: 18.21, sedang: 45.30, tidak: 36.49 },
+  { nama: 'Konawe Selatan',     pernah: 16.17, sedang: 57.54, tidak: 26.29 },
+  { nama: 'Bombana',            pernah: 21.44, sedang: 44.23, tidak: 34.33 },
+  { nama: 'Wakatobi',           pernah: 18.20, sedang: 28.06, tidak: 53.73 },
+  { nama: 'Kolaka Utara',       pernah: 20.49, sedang: 46.21, tidak: 33.30 },
+  { nama: 'Buton Utara',        pernah: 20.45, sedang: 30.87, tidak: 48.68 },
+  { nama: 'Konawe Utara',       pernah: 24.93, sedang: 48.45, tidak: 26.63 },
+  { nama: 'Kolaka Timur',       pernah: 19.59, sedang: 61.37, tidak: 19.04 },
+  { nama: 'Konawe Kepulauan',   pernah: 21.03, sedang: 42.31, tidak: 36.65 },
+  { nama: 'Muna Barat',         pernah: 25.25, sedang: 33.04, tidak: 41.72 },
+  { nama: 'Buton Tengah',       pernah: 20.90, sedang: 19.61, tidak: 59.49 },
+  { nama: 'Buton Selatan',      pernah: 15.26, sedang: 45.45, tidak: 39.29 },
+  { nama: 'Kendari',            pernah: 23.88, sedang: 34.91, tidak: 41.21 },
+  { nama: 'Baubau',             pernah: 23.51, sedang: 28.43, tidak: 48.05 },
+  { nama: 'Sulawesi Tenggara',  pernah: 20.92, sedang: 43.20, tidak: 35.88 },
+];
+
+const AGE_PROFILES = {
+  13: {
+    level: 'SMP Kelas VII',
+    desc: 'Transisi dari SD ke SMP — awal paparan gadget intensif. Mulai terbiasa media sosial dan konten video.',
+    gadget:   { labels: ['Memiliki gadget', 'Tidak memiliki'], data: [70, 30] },
+    duration: { labels: ['< 2 jam', '2–4 jam', '5–7 jam', '> 7 jam'], data: [30, 40, 20, 10] },
+    sleep:    { labels: ['Sebelum 21:00', '21:00–22:00', '22:00–23:00', 'Setelah 23:00'], data: [35, 32, 22, 11] },
+    focus:    { labels: ['Tidak terganggu', 'Jarang', 'Kadang-kadang', 'Sering/selalu'], data: [18, 32, 35, 15] },
+    activity: { labels: ['Belajar', 'Media sosial', 'Bermain game', 'Nonton video', 'Info penting'], data: [22, 28, 25, 18, 7] },
+  },
+  14: {
+    level: 'SMP Kelas VIII',
+    desc: 'Peningkatan penggunaan media sosial. Mulai terpapar konten game online dan streaming lebih intens.',
+    gadget:   { labels: ['Memiliki gadget', 'Tidak memiliki'], data: [75, 25] },
+    duration: { labels: ['< 2 jam', '2–4 jam', '5–7 jam', '> 7 jam'], data: [25, 38, 25, 12] },
+    sleep:    { labels: ['Sebelum 21:00', '21:00–22:00', '22:00–23:00', 'Setelah 23:00'], data: [28, 30, 28, 14] },
+    focus:    { labels: ['Tidak terganggu', 'Jarang', 'Kadang-kadang', 'Sering/selalu'], data: [15, 28, 38, 19] },
+    activity: { labels: ['Belajar', 'Media sosial', 'Bermain game', 'Nonton video', 'Info penting'], data: [18, 32, 26, 18, 6] },
+  },
+  15: {
+    level: 'SMP Kelas IX',
+    desc: 'Tekanan ujian nasional meningkat namun penggunaan gadget ikut naik. Konflik antara belajar dan hiburan.',
+    gadget:   { labels: ['Memiliki gadget', 'Tidak memiliki'], data: [80, 20] },
+    duration: { labels: ['< 2 jam', '2–4 jam', '5–7 jam', '> 7 jam'], data: [20, 35, 28, 17] },
+    sleep:    { labels: ['Sebelum 21:00', '21:00–22:00', '22:00–23:00', 'Setelah 23:00'], data: [20, 28, 32, 20] },
+    focus:    { labels: ['Tidak terganggu', 'Jarang', 'Kadang-kadang', 'Sering/selalu'], data: [12, 25, 40, 23] },
+    activity: { labels: ['Belajar', 'Media sosial', 'Bermain game', 'Nonton video', 'Info penting'], data: [20, 33, 24, 17, 6] },
+  },
+  16: {
+    level: 'SMA Kelas X',
+    desc: 'Masuk SMA membuka lingkaran sosial baru. Penggunaan media sosial dan chat group meningkat signifikan.',
+    gadget:   { labels: ['Memiliki gadget', 'Tidak memiliki'], data: [85, 15] },
+    duration: { labels: ['< 2 jam', '2–4 jam', '5–7 jam', '> 7 jam'], data: [15, 30, 32, 23] },
+    sleep:    { labels: ['Sebelum 21:00', '21:00–22:00', '22:00–23:00', 'Setelah 23:00'], data: [14, 22, 34, 30] },
+    focus:    { labels: ['Tidak terganggu', 'Jarang', 'Kadang-kadang', 'Sering/selalu'], data: [10, 22, 40, 28] },
+    activity: { labels: ['Belajar', 'Media sosial', 'Bermain game', 'Nonton video', 'Info penting'], data: [16, 36, 22, 20, 6] },
+  },
+  17: {
+    level: 'SMA Kelas XI',
+    desc: 'Penggunaan gadget memuncak. Jam tidur larut menjadi kebiasaan. Fokus belajar mulai terdampak signifikan.',
+    gadget:   { labels: ['Memiliki gadget', 'Tidak memiliki'], data: [88, 12] },
+    duration: { labels: ['< 2 jam', '2–4 jam', '5–7 jam', '> 7 jam'], data: [12, 28, 35, 25] },
+    sleep:    { labels: ['Sebelum 21:00', '21:00–22:00', '22:00–23:00', 'Setelah 23:00'], data: [8, 17, 32, 43] },
+    focus:    { labels: ['Tidak terganggu', 'Jarang', 'Kadang-kadang', 'Sering/selalu'], data: [8, 19, 38, 35] },
+    activity: { labels: ['Belajar', 'Media sosial', 'Bermain game', 'Nonton video', 'Info penting'], data: [14, 38, 20, 22, 6] },
+  },
+  18: {
+    level: 'SMA Kelas XII',
+    desc: 'Persiapan ujian akhir namun kebiasaan gadget sudah terbentuk kuat. Tidur sangat larut sudah menjadi norma.',
+    gadget:   { labels: ['Memiliki gadget', 'Tidak memiliki'], data: [90, 10] },
+    duration: { labels: ['< 2 jam', '2–4 jam', '5–7 jam', '> 7 jam'], data: [10, 25, 37, 28] },
+    sleep:    { labels: ['Sebelum 21:00', '21:00–22:00', '22:00–23:00', 'Setelah 23:00'], data: [5, 12, 30, 53] },
+    focus:    { labels: ['Tidak terganggu', 'Jarang', 'Kadang-kadang', 'Sering/selalu'], data: [6, 18, 35, 41] },
+    activity: { labels: ['Belajar', 'Media sosial', 'Bermain game', 'Nonton video', 'Info penting'], data: [15, 36, 18, 24, 7] },
+  },
+};
+
+const AGE_TAB_CONFIG = {
+  gadget: {
+    title: 'Kepemilikan Gadget',
+    sub: 'Persentase pelajar yang memiliki gadget pribadi',
+    colors: ['#4DA6FF', '#FF6B6B'],
+    type: 'pie',
+  },
+  duration: {
+    title: 'Durasi Penggunaan Gadget per Hari',
+    sub: 'Estimasi distribusi lama pemakaian gadget harian',
+    colors: ['#2ED8A8', '#4DA6FF', '#FFB347', '#FF6B6B'],
+    type: 'bar',
+  },
+  sleep: {
+    title: 'Jam Tidur pada Hari Sekolah',
+    sub: 'Distribusi jam tidur malam pelajar',
+    colors: ['#2ED8A8', '#4DA6FF', '#FFB347', '#FF6B6B'],
+    type: 'bar',
+  },
+  focus: {
+    title: 'Gangguan Konsentrasi Belajar',
+    sub: 'Seberapa sering gadget mengganggu fokus belajar',
+    colors: ['#2ED8A8', '#4DA6FF', '#FFB347', '#FF6B6B'],
+    type: 'bar',
+  },
+  activity: {
+    title: 'Aktivitas Saat Menggunakan Gadget',
+    sub: 'Jenis kegiatan yang paling sering dilakukan',
+    colors: ['#4DA6FF', '#A78BFA', '#FFB347', '#2ED8A8', '#FF6B6B'],
+    type: 'bar',
+  },
+};
+
+const COLORS = {
+  blue:   '#4DA6FF',
+  teal:   '#2ED8A8',
+  coral:  '#FF6B6B',
+  amber:  '#FFB347',
+  purple: '#A78BFA',
+  grid:   'rgba(77, 166, 255, 0.07)',
+  text:   '#7aa3c8',
+};
+
+// ============================================================
+//  Chart Functions
+// ============================================================
+
+Chart.defaults.color = COLORS.text;
+Chart.defaults.borderColor = COLORS.grid;
+Chart.defaults.font.family = "'Segoe UI', system-ui, -apple-system, sans-serif";
+Chart.defaults.font.size = 12;
+
+let donutKendariChart = null;
+let compareBarChart   = null;
+let ageChartInst      = null;
+let regChartInst      = null;
+
+const TOOLTIP_OPTS = {
+  backgroundColor: '#0d2244',
+  borderColor: 'rgba(77,166,255,0.25)',
+  borderWidth: 1,
+  titleColor: '#e8f4ff',
+  bodyColor: '#7aa3c8',
+  padding: 10,
+  cornerRadius: 8,
+  callbacks: {
+    label: ctx => '  ' + ctx.label + ': ' + ctx.raw + '%',
+  },
+};
+
+const TOOLTIP_NUM = {
+  ...TOOLTIP_OPTS,
+  callbacks: {
+    label: ctx => '  ' + ctx.dataset.label + ': ' + ctx.raw + '%',
+  },
+};
+
+function buildDonutKendari() {
+  const ctx = document.getElementById('donutKendari').getContext('2d');
+  if (donutKendariChart) donutKendariChart.destroy();
+  donutKendariChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Pernah', 'Sedang', 'Tidak menggunakan'],
+      datasets: [{
+        data: [23.88, 34.91, 41.21],
+        backgroundColor: [COLORS.blue, COLORS.teal, COLORS.coral],
+        borderColor: '#0d2244',
+        borderWidth: 3,
+        hoverBorderColor: '#0d2244',
+        hoverBorderWidth: 3,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '66%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...TOOLTIP_OPTS,
+          callbacks: { label: ctx => '  ' + ctx.label + ': ' + ctx.raw + '%' },
+        },
+      },
+    },
+    plugins: [{
+      id: 'centerLabel',
+      afterDraw(chart) {
+        const { ctx, chartArea: { width, height, left, top } } = chart;
+        ctx.save();
+        const cx = left + width / 2;
+        const cy = top + height / 2;
+        ctx.fillStyle = '#e8f4ff';
+        ctx.font = 'bold 20px Segoe UI, system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Kendari', cx, cy - 10);
+        ctx.fillStyle = '#7aa3c8';
+        ctx.font = '11px Segoe UI, system-ui, sans-serif';
+        ctx.fillText('2024', cx, cy + 10);
+        ctx.restore();
+      },
+    }],
+  });
+}
+
+function buildKendariBar() {
+  const ctx = document.getElementById('kendariBar').getContext('2d');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Pernah Mengakses', 'Sedang Mengakses', 'Tidak Menggunakan'],
+      datasets: [{
+        label: 'Kota Kendari 2024',
+        data: [23.88, 34.91, 41.21],
+        backgroundColor: [COLORS.blue + 'cc', COLORS.teal + 'cc', COLORS.coral + 'cc'],
+        borderColor: [COLORS.blue, COLORS.teal, COLORS.coral],
+        borderWidth: 1.5,
+        borderRadius: 8,
+        borderSkipped: false,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...TOOLTIP_OPTS,
+          callbacks: { label: ctx => '  ' + ctx.raw.toFixed(2) + '%' },
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: COLORS.grid },
+          ticks: { color: '#7aa3c8', font: { size: 12 } },
+          border: { color: 'rgba(77,166,255,0.15)' },
+        },
+        y: {
+          beginAtZero: true,
+          max: 60,
+          grid: { color: COLORS.grid },
+          ticks: { color: '#7aa3c8', callback: v => v + '%' },
+          border: { color: 'rgba(77,166,255,0.15)' },
+        },
+      },
+    },
+  });
+}
+
+
+
+function buildAgeChart(age, tab) {
+  const ctx = document.getElementById('ageChart').getContext('2d');
+  const profile = AGE_PROFILES[age];
+  const tabCfg  = AGE_TAB_CONFIG[tab];
+  const dataset = profile[tab];
+
+  if (ageChartInst) ageChartInst.destroy();
+
+  const isDonut = tabCfg.type === 'pie';
+
+  ageChartInst = new Chart(ctx, {
+    type: isDonut ? 'doughnut' : 'bar',
+    data: {
+      labels: dataset.labels,
+      datasets: [{
+        label: tabCfg.title,
+        data: dataset.data,
+        backgroundColor: isDonut
+          ? tabCfg.colors
+          : tabCfg.colors.map(c => c + 'cc'),
+        borderColor: tabCfg.colors,
+        borderWidth: 1.5,
+        borderRadius: isDonut ? 0 : 6,
+        borderSkipped: false,
+        ...(isDonut && { borderColor: '#0d2244', borderWidth: 3 }),
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      ...(isDonut ? { cutout: '60%' } : {}),
+      plugins: {
+        legend: isDonut
+          ? {
+              display: true,
+              position: 'right',
+              labels: {
+                color: '#7aa3c8',
+                font: { size: 12 },
+                padding: 14,
+                boxWidth: 10,
+              },
+            }
+          : { display: false },
+        tooltip: {
+          ...TOOLTIP_OPTS,
+          callbacks: { label: ctx => '  ' + (isDonut ? ctx.label : ctx.dataset.label) + ': ' + ctx.raw + '%' },
+        },
+      },
+      ...(isDonut ? {} : {
+        scales: {
+          x: {
+            grid: { color: COLORS.grid },
+            ticks: { color: '#7aa3c8', maxRotation: 20, minRotation: 0 },
+            border: { color: 'rgba(77,166,255,0.15)' },
+          },
+          y: {
+            beginAtZero: true,
+            max: 100,
+            grid: { color: COLORS.grid },
+            ticks: { color: '#7aa3c8', callback: v => v + '%' },
+            border: { color: 'rgba(77,166,255,0.15)' },
+          },
+        },
+      }),
+    },
+  });
+
+  document.getElementById('ageChartTitle').textContent = tabCfg.title + ' — Usia ' + age + ' Tahun (' + profile.level + ')';
+  document.getElementById('ageChartSub').textContent = tabCfg.sub;
+}
+
+// Palet warna unik per kota/kabupaten
+const REGION_COLORS = [
+  { bg: 'rgba(77,166,255,0.75)',   border: '#4DA6FF' },  // blue
+  { bg: 'rgba(46,216,168,0.75)',   border: '#2ED8A8' },  // teal
+  { bg: 'rgba(255,107,107,0.75)',  border: '#FF6B6B' },  // coral
+  { bg: 'rgba(255,179,71,0.75)',   border: '#FFB347' },  // amber
+  { bg: 'rgba(167,139,250,0.75)', border: '#A78BFA' },  // purple
+  { bg: 'rgba(52,211,153,0.75)',  border: '#34D399' },  // emerald
+  { bg: 'rgba(251,113,133,0.75)', border: '#FB7185' },  // rose
+  { bg: 'rgba(56,189,248,0.75)',  border: '#38BDF8' },  // sky
+  { bg: 'rgba(250,204,21,0.75)',  border: '#FACC15' },  // yellow
+  { bg: 'rgba(192,132,252,0.75)', border: '#C084FC' },  // violet
+  { bg: 'rgba(94,234,212,0.75)',  border: '#5EEAD4' },  // cyan-green
+  { bg: 'rgba(253,164,175,0.75)', border: '#FDA4AF' },  // pink
+  { bg: 'rgba(134,239,172,0.75)', border: '#86EFAC' },  // green
+  { bg: 'rgba(196,181,253,0.75)', border: '#C4B5FD' },  // lavender
+  { bg: 'rgba(253,186,116,0.75)', border: '#FDBA74' },  // orange
+  { bg: 'rgba(103,232,249,0.75)', border: '#67E8F9' },  // aqua
+  { bg: 'rgba(217,70,239,0.65)',  border: '#D946EF' },  // fuchsia
+  { bg: 'rgba(99,102,241,0.75)',  border: '#6366F1' },  // indigo
+];
+
+function buildRegChart(key) {
+  const ctx = document.getElementById('regChart').getContext('2d');
+  const titleMap = {
+    sedang: 'Persentase Wilayah Sedang Mengakses Internet',
+    pernah: 'Persentase Wilayah Pernah Mengakses Internet',
+    tidak:  'Persentase Wilayah Tidak Menggunakan Internet',
+  };
+
+  const sorted = [...BPS_DATA].sort((a, b) => b[key] - a[key]);
+  const labels = sorted.map(d => d.nama);
+  const values = sorted.map(d => d[key]);
+
+  // Tiap bar warna unik; Kendari dapat warna lebih terang & bold
+  const bgColors = sorted.map((d, i) => {
+    if (d.nama === 'Kendari') return REGION_COLORS[0].bg;
+    return REGION_COLORS[i % REGION_COLORS.length].bg;
+  });
+  const borderColors = sorted.map((d, i) => {
+    if (d.nama === 'Kendari') return REGION_COLORS[0].border;
+    return REGION_COLORS[i % REGION_COLORS.length].border;
+  });
+  const tickColors = sorted.map((d, i) => {
+    if (d.nama === 'Kendari') return REGION_COLORS[0].border;
+    return REGION_COLORS[i % REGION_COLORS.length].border;
+  });
+
+  if (regChartInst) regChartInst.destroy();
+
+  regChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: titleMap[key],
+        data: values,
+        backgroundColor: bgColors,
+        borderColor: borderColors,
+        borderWidth: 1.5,
+        borderRadius: 4,
+        borderSkipped: false,
+      }],
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...TOOLTIP_NUM,
+          callbacks: {
+            label: ctx => '  ' + ctx.parsed.x.toFixed(2) + '%',
+          },
+        },
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          max: 70,
+          grid: { color: COLORS.grid },
+          ticks: { color: '#7aa3c8', callback: v => v + '%' },
+          border: { color: 'rgba(77,166,255,0.15)' },
+        },
+        y: {
+          grid: { display: false },
+          ticks: {
+            color: (ctx) => tickColors[ctx.index] || '#7aa3c8',
+            font: (ctx) => ({
+              size: 12,
+              weight: labels[ctx.index] === 'Kendari' ? '700' : '400',
+            }),
+          },
+          border: { color: 'rgba(77,166,255,0.15)' },
+        },
+      },
+    },
+  });
+
+  document.getElementById('regChartTitle').textContent = titleMap[key];
+}
+
+function buildDataTable() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  BPS_DATA.forEach(row => {
+    const total = (row.pernah + row.sedang).toFixed(2);
+    const tr = document.createElement('tr');
+    if (row.nama === 'Kendari') tr.className = 'row-kendari';
+    if (row.nama === 'Sulawesi Tenggara') tr.className = 'row-provinsi';
+
+    tr.innerHTML = `
+      <td>${row.nama}</td>
+      <td class="col-num">
+        <div class="pct-bar-wrap">
+          <span class="pct-val">${row.pernah.toFixed(2)}</span>
+          <div class="pct-bar-mini"><div class="pct-bar-fill" style="width:${row.pernah / 35 * 100}%;background:#4DA6FF"></div></div>
+        </div>
+      </td>
+      <td class="col-num">
+        <div class="pct-bar-wrap">
+          <span class="pct-val">${row.sedang.toFixed(2)}</span>
+          <div class="pct-bar-mini"><div class="pct-bar-fill" style="width:${row.sedang / 70 * 100}%;background:#2ED8A8"></div></div>
+        </div>
+      </td>
+      <td class="col-num">
+        <div class="pct-bar-wrap">
+          <span class="pct-val">${row.tidak.toFixed(2)}</span>
+          <div class="pct-bar-mini"><div class="pct-bar-fill" style="width:${row.tidak / 65 * 100}%;background:#FF6B6B"></div></div>
+        </div>
+      </td>
+      <td class="col-num" style="color:#e8f4ff;font-weight:500">${total}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ============================================================
+//  Main Application Logic
+// ============================================================
+
+let currentAge = 13;
+let currentAgeTab = 'gadget';
+let currentRegTab = 'sedang';
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Init charts
+  buildDonutKendari();
+  buildKendariBar();
+  buildAgeChart(currentAge, currentAgeTab);
+  buildRegChart(currentRegTab);
+  buildDataTable();
+
+  // Sidebar navigation
+  const navItems = document.querySelectorAll('.nav-item');
+  const sections = document.querySelectorAll('.section');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      navItems.forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      const target = document.getElementById(item.dataset.section);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navItems.forEach(n => {
+          n.classList.toggle('active', n.dataset.section === id);
+        });
+      }
+    });
+  }, { threshold: 0.4, rootMargin: '-80px 0px -60% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+
+  // ── MOBILE: Hamburger & Sidebar ──
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  hamburgerBtn.addEventListener('click', () => {
+    if (sidebar.classList.contains('open')) closeSidebar();
+    else openSidebar();
+  });
+
+  overlay.addEventListener('click', closeSidebar);
+
+  // Close sidebar when a nav item is clicked on mobile
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      if (window.innerWidth <= 900) closeSidebar();
+    });
+  });
+
+  // ── MOBILE: Bottom Nav ──
+  const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+  bottomNavItems.forEach(btn => {
+    btn.addEventListener('click', () => {
+      bottomNavItems.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const target = document.getElementById(btn.dataset.section);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Sync bottom nav with scroll via IntersectionObserver (reuse existing observer logic)
+  const allSections = document.querySelectorAll('.section');
+  const bottomObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        bottomNavItems.forEach(b => {
+          b.classList.toggle('active', b.dataset.section === id);
+        });
+      }
+    });
+  }, { threshold: 0.3, rootMargin: '-60px 0px -50% 0px' });
+  allSections.forEach(s => bottomObserver.observe(s));
+
+
+  // Age selector
+  const ageBtns = document.querySelectorAll('.age-btn');
+  ageBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      ageBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentAge = parseInt(btn.dataset.age);
+      const profile = AGE_PROFILES[currentAge];
+      const ctx = document.getElementById('age-context');
+      ctx.querySelector('.age-context-num').textContent = currentAge;
+      ctx.querySelector('.age-context-level').textContent = profile.level;
+      ctx.querySelector('.age-context-desc').textContent = profile.desc;
+      buildAgeChart(currentAge, currentAgeTab);
+    });
+  });
+
+  // Age chart tabs
+  const ageTabBtns = document.querySelectorAll('#ageTabRow .tab-btn');
+  ageTabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      ageTabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentAgeTab = btn.dataset.tab;
+      buildAgeChart(currentAge, currentAgeTab);
+    });
+  });
+
+  // Regional chart tabs
+  const regTabBtns = document.querySelectorAll('#regTabRow .tab-btn');
+  regTabBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      regTabBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentRegTab = btn.dataset.tab;
+      buildRegChart(currentRegTab);
+    });
+  });
+});
+  </script>
+
+  <!-- Mobile sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Bottom navigation (mobile only) -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="bottom-nav-item active" data-section="overview">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Overview
+    </button>
+    <button class="bottom-nav-item" data-section="usia">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Usia
+    </button>
+    <button class="bottom-nav-item" data-section="wilayah">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+      Wilayah
+    </button>
+    <button class="bottom-nav-item" data-section="temuan">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Temuan
+    </button>
+  </nav>
+</body>
+</html>
